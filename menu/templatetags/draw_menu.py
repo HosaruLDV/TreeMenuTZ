@@ -2,13 +2,11 @@ from django import template
 
 from menu.models import Item
 
-
 register = template.Library()
 
 
-@register.inclusion_tag('menu/includes/nested_menu.html', takes_context=True)
+@register.inclusion_tag(filename='menu/includes/nested_menu.html', takes_context=True)
 def draw_menu(context, menu):
-
     try:
         items = Item.objects.filter(menu__title=menu)
         items_values = items.values()
@@ -26,22 +24,12 @@ def draw_menu(context, menu):
         result_dict = {
             'items': [
                 item for item in Item.objects.filter(menu__title=menu, parent=None).values()
-                ]
-            }
+            ]
+        }
 
     result_dict['menu'] = menu
-    result_dict['other_querystring'] = get_querystring(context, menu)
 
     return result_dict
-
-
-def get_querystring(context, menu):
-    querystring_args = []
-    for key in context['request'].GET:
-        if key != menu:
-            querystring_args.append(key + '=' + context['request'].GET[key])
-    querystring = ('&').join(querystring_args)
-    return querystring
 
 
 def get_child_items(items_values, current_item_id, selected_item_id_list):
